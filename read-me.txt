@@ -1,0 +1,198 @@
+We have 2 main files 1) app and  2) public.
+
+
+IN APP FOLDER:
+
+There will be controllers,models, views and other configuration files.
+The htacces file in there is for protecting the inside folders, for example if we type in url ../app, wont show the containing folders.
+
+Folders and files inside the main -app- file:
+
+1) Core Folder:
+    will contain the following files:
+    
+   -- a) app.php : This is an very important file bcz the entire site will run through this class (App class) inside the file.
+    We instatiate this class in index.php(in public filder). What this class will do is to get the url that is inserted and "explode it"
+    so we can see which controller will be used ans aldso which method of the controller.
+    For example the url is ->site.com/products/add,  this means that we will use the products conteolles and the add method of that controller.
+    We have set for the class a default controller (home) and a default method (index) which are protected since they will be only used inside the class.
+    So what this does in few words is to get the url so the programm knows which controller to use  and what method. Controller will be in position 0 of the array,
+    method in posotion 1. From there anything after that will be parameters used to retrieve data from database, and we can put as many as we want in the url. 
+
+
+    -- b) controller.php : This will be the controller which will be extended from all the other controllers in the controllers file. This happens because all the controllers,
+    will have some same methods.. For example the view method, which will be responsible to show which view shoould be used, and will be used from all the controllers.
+    So instead of writing this method in all controllers (keep in mind that it may be multiple methods), we will put it in this "main" controller and since every other
+    controllers will "extend" this controller, they will be able to use these methods.
+
+    -- c) config.php : This file will contain all the configuration we will need foe our website to run for example website name, database name, etc. (as constants). 
+          These will be useful for the database.php file below. Also there we put the debug mode, which if its true (during in development), it will show errors
+
+    -- d) database.php : Here we will create our database class.
+     
+    -- e) functions.php :
+
+    
+
+------- 
+
+2) Controllers Folder: Here we create our controllers... Each controller will represent a page and will have a class and its properties and methods.
+KEEP IN MIND that the class name must have the same name as the file name since it will be picked by the app.php file (read a) -> app.php, in core folder above). 
+For example if the we want to build the home controller which will be about home page, the name of the class will be Home (Class Home) and the name of the file, home.php.
+
+
+------- 
+
+
+3) Models Folder: Models here are classes that do very specific things. We could save these functions in the controllers but the thing 
+is that a single model can be used by many controllers. for example the login and signup cintrollers will use the same Users model.
+
+
+
+<--------------------->   
+
+
+4) Views Folder
+
+<--------------------->   <--------------------->   <--------------------->   <--------------------->   
+<--------------------->   <--------------------->   <--------------------->   <--------------------->   
+
+
+IN PUBLIC FOLDER:
+
+We will create an htaccess file in there because:
+We want the whole site to redirect to index.php. So regardless what the user types in the url we want this request to go through this index.php.
+Even if we write a url that does not exist, it will redirect to index, so we dont have page not found.
+(So the whole website will be conteolles by this index.php). Also we want to create clean urls so for example the url will not contain ? for query strings  etc.
+
+1) Assets folder: Will contains css, js files etc. If we have for example a client area and an admin area we should better create files for every case so 
+for example admin area will have its own css, as also the client area.
+---The problem is that thae way we have structured our mvc, everything goes through the index page, so it wont be easy for the pages in views to find their assets.
+to be able to do that, we must use the 'foo' (absolute) path in views pages, for example (http:://localhost/*project*/public/assets/*folder*/css/style.css). The other
+problem is that we must make these paths dynamic, because if we 'hardcode' them in a file, and we are for example in local host, and then we upload the project on
+an actual server, we will have to change all paths again.
+
+The first step is to go to index.php since its the reference point and make the dynamic paths we need by retrieving some info from the server using 
+the print_r($_SERVER) command. 
+
+
+
+
+
+
+
+////////////////////////////----- STRUCTURE ------///////////////////////////////////
+
+In public we have index.php from which everything goes through there (because of the htaccess file)
+
+Inside the index we include the following files 
+
+../app/init.php
+
+In the init folder we will include all the files contained in the core folder which is located in app folder. 
+
+../app/core/config.php
+
+../app/core/app.php
+
+../app/core/functions.php
+
+../app/core/database.php
+
+../app/core/controller.php
+
+We do that so everything is included in the index page in public folder.
+
+
+
+(gets url)           (main controller extended 
+                        by other controllers)
+
+
+ ----------             ------------------      -------------         ---------------    -----------------
+| app.php |             |  controller.php |     | config.php |        | database.php |   |  functions.php |  (in -> app/core folder)
+ ----------             ------------------      --------------        --------------    -----------------
+    |                           |                     |                      |                   |
+    |                           |                     |                      |                   |
+    |_______________________________________________________________________________________________________________ _____________________________________________    
+                                |
+                                | included in
+                                |
+                         ---------------
+                         |   init.php  |  app/init.php file
+                         ---------------
+                                |
+                                | included in
+                                |
+                         ---------------
+                         |   index.php  |  public/index.php file (--The first file to look--)
+                         ---------------
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+----- ABOUT check_login FUNCTION IN user.class.php -------
+
+* We want this function to do 2 different things according what we have provided to the params. The 2 things are to check the role of the user so it can decide
+* if he is allowed to enter some pages (this will happen if the $allowed param is provided), or ( if the $allowed param is NOT provided) to check if 
+* if user is (still) logged in during a page reload (In case for example when a user deletes his profile of signs out)
+
+* About these 2 params.. 
+* 1)the $redirect param which by default will be false,and the reason is that There is a chance that the user data 
+* will not be available in the profile page (for example not logged in, and user puts profile page directly to url). In this case, we want the user,
+* to redirect to another page.So we put true as param in case we want to redirect, or false in case we dont want to.
+*
+* 2) The  $allowed param which will be an array (optional param)... This param will be provided in cases we need to check the role of the logged in user so we can
+* give him access to the certain pages or areas of the project. For example when we call the function, we can give the value of admin in the param,
+* and if the user is admin, allow him access to the page or else redirect him or  dont allow access.
+
+!!!!!! KEEP IN MIND, IF $allowed PARAM IS PROVIDED, WE TAKE THAT THE USER IS ALREADY LOGGED IN SO THERE IS A SESSION. BUT IF ITS NOT PROVIDED,
+THERE MIGHT NOT BE A SESSION THATS WHY WE CHECK IF THERE IS A SESSION IF THE $allowed PARAM IS NOT PROVIDED. (check the function)!!!!!!!!!!!!!!
+
+
+->timeline of the function
+
+* First will check if the $allowed param is provided when we call the function from the corresponding controller.
+* if it is provided, will get the users if from the SESSION, and select the user from database from his id.
+* and then will check if his role is provided to the values (or value) of the $allowed parameter and if yes,
+* it will return true and also the result. If no, it will redirect the user, or block access(whatever we tell it to do.)
+
+
+
+
+
+/////////////////////////////////////////////////////////////  ABOUT AJAX  ////////////////////////////////////////////////////////////////////////////////////
+
+From the js script from the corresponded view, the data go to the corresponded controller, and to the requested method.
+in there the desired model is called(the method of the model) and the data that will be RETURNED(data MUST be returned from the model to the controller),
+to the controller
+
+
+
+
+
+
+////////////////////////////////////////////////
+
+-- error with undefined variables of database (read, write) maybe we need to use newInstance function instead of get newInstance
+
+-- SyntaxError: Unexpected token '<', "<br /> is not valid JSON -> probably a mistype, example wrong var name somewhere etc.
+
+-- Uncaught SyntaxError: JSON.parse:unexpected character at line 1 column ... of JSON data, means the data we give to json is not valid
+
+
+
+
+<--------------------->   <--------------------->   <--------------------->   <--------------------->   
+<--------------------->   <--------------------->   <--------------------->   <--------------------->   
+
+ABOOUT PUBLIC FOLDER IN url
+
+the way this project is structured, we would have the "public" filder shown in url since this is the file from where we "enter"  to our website.. To remove it,
+I created an htaccess file in thew root directore and entered this code:
+RewriteEngine on
+RewriteCond %{REQUEST_URI} !^public
+RewriteRule ^(.*)$ public/$1 [L]
+(also i put this --> Options -Indexes so they woont see structure contents).
+and also in index..php I wrote this code ---> $root = str_replace("public/", "", $root); <--- to replace public with blank in the url.
