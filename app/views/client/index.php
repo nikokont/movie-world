@@ -9,7 +9,9 @@
 
         <div class="movie-search">
             <input type="text" class="form-control" id="search-movie-input" name="category-name" onkeyup="searchMovies()" placeholder="Search...">
-            <button class="btn add-new-movie-button" data-bs-toggle="modal" data-bs-target="#add-movie-modal">+ Add New</button>
+             <?php if (isset($data['logged-user'])) { ?>
+                <button class="btn add-new-movie-button" data-bs-toggle="modal" data-bs-target="#add-movie-modal">+ Add New</button>
+             <?php } ?>
         </div><!--movie-search-end-->
 
         <div class="movie-filters">
